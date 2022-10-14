@@ -11,6 +11,8 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="c4b57cd6-4dc4-4666-965f-37cb0c2c279c">
 		<http:request-connection host="localhost" port="8081" />
 	</http:request-config>
+	<configuration doc:name="Configuration" doc:id="c7bc0868-c623-44f8-9f98-9d0a11a0459e" defaultErrorHandler-ref="globalError_Handler" />
+	<configuration-properties doc:name="Configuration properties" doc:id="8619bd63-333a-4677-9208-de66dc66638d" file="config.yaml" />
 	<error-handler name="globalError_Handler" doc:id="724c88a5-0c9c-4618-9ec2-e18591205fc6" >
 		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="8706bb44-3f3a-4e6c-9737-3e4847a92e34" type="ANY">
 			<set-payload value="Failed to get Data" doc:name="Set Payload" doc:id="c5937f13-fc0e-4f37-a3d3-8509c4c239ac" />

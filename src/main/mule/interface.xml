@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
     <http:listener-config name="sf-mule-syapi-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="8090" />
     </http:listener-config>
@@ -123,19 +123,48 @@ output application/json
             </on-error-propagate>
         </error-handler>
     </flow>
-    <flow name="get:\contactDetails\(id):sf-mule-syapi-config">
-        <flow-ref doc:name="Get Data contact from salesforce" doc:id="e11c9d06-21d1-4e81-92f3-fec2a4f72520" name="GetDataContact"/>
+    <flow name="get:\contactDetails:sf-mule-syapi-config">
+        <flow-ref doc:name="Get Data contact from salesforce" doc:id="e11c9d06-21d1-4e81-92f3-fec2a4f72520" name="GetDataContact" />
 		<ee:transform>
-            <ee:variables>
-                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform>
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-payload]]></ee:set-payload>
+{
+  userDetails: {
+    Account: {
+      Name: "United Oil & Gas Corp.",
+      Description: "World's third largest oil and gas company.",
+      AccountNumber: "CD355118",
+      BillingCity: "New York",
+      BillingStreet: "1301 Avenue of the Americas \\nNew York, NY 10019\\nUSA",
+      BillingState: "NY",
+      NumberOfEmployees: 145000,
+      Industry: "Energy",
+      Type: "Customer - Direct",
+      Phone: "(212) 842-5500",
+      AnnualRevenue: 5.6E+9
+    },
+    Email: "lboyle@uog.com",
+    FirstName: "Lauren",
+    Phone: "(212) 842-5500",
+    LastName: "Boyle",
+    Cases: [
+      {
+        Subject: "Performance inadequate for second consecutive week",
+        Priority: "High",
+        ContactEmail: "lboyle@uog.com",
+        Status: "Closed"
+      }, 
+      {
+        Subject: "Performance inadequate for second consecutive week",
+        Priority: "High",
+        ContactEmail: "lboyle@uog.com",
+        Status: "Closed"
+      }
+    ]
+  }
+}]]></ee:set-payload>
             </ee:message>
         </ee:transform>
     </flow>

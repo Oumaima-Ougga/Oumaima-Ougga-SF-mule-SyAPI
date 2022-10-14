@@ -6,8 +6,9 @@ types:
     
   
 /contactDetails:
-  /{id}:
     get:
+     queryParameters:
+          email: string
      responses:
        200:
           body:

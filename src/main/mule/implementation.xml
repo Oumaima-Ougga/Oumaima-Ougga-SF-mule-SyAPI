@@ -7,14 +7,14 @@ http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mu
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
 	<flow name="GetDataContact" doc:id="852e1e86-3a41-4729-813c-0d964aae0ef4" >
-		<set-variable value="#[attributes.uriParams.id]" doc:name="Set contact ID" doc:id="b9e2f286-a03d-4c41-be22-cf79d1f9007c" variableName="contactID"/>
+		<set-variable value="#[attributes.queryParams.email]" doc:name="Set contact Email" doc:id="b9e2f286-a03d-4c41-be22-cf79d1f9007c" variableName="contactEmail"/>
 		<salesforce:query doc:name="Query" doc:id="abe9b443-65a2-4825-bd27-125b754410db" config-ref="Salesforce_Config">
 					<salesforce:salesforce-query><![CDATA[Select Id, FirstName, LastName, Phone, Email ,AccountId, Account.Name from Contact
- where Id = ':contactId']]></salesforce:salesforce-query>
+ where Email = ':contactEmail']]></salesforce:salesforce-query>
 					<salesforce:parameters><![CDATA[#[output application/java
 ---
 {
-	contactId : vars.contactId
+	contactEmail : vars.contactEmail
 }]]]></salesforce:parameters>
 				</salesforce:query>
 		<ee:transform doc:name="Transform Message" doc:id="82b8c2ac-e9fe-47fd-8b71-5bbb215f0025" >
@@ -27,8 +27,6 @@ payload]]></ee:set-payload>
 		</ee:transform>
 		<set-variable value="#[payload]" doc:name="Set contact" doc:id="12c2c7c1-1b3e-4fd7-992a-7cc5c3c8848d" variableName="ContactInfo"/>
 		<set-variable value="#[payload.AccountId[0]]" doc:name="Set Account Id associated" doc:id="a20bbb4f-f884-4014-a645-e2060c3812f2" variableName="AccountId"/>
-		<set-variable value="#[payload[0].Email]" doc:name="Set Email Contact" doc:id="1414cec3-d249-427a-92bd-df374dd6b681" variableName="EmailContact"/>
-		<set-variable value="#[100000000]" doc:name="Set Timeout" doc:id="b29b5c4a-9a72-43c9-bd86-bd73d31dc65f" variableName="timeout"/>
 		<scatter-gather doc:name="Scatter-Gather" doc:id="49500ac2-05d8-4b90-8ede-a50741772223">
 			<route>
 				<salesforce:query doc:name="Get Account Data" doc:id="074602ab-e654-434a-846e-8c42d2bf06ed" config-ref="Salesforce_Config">
@@ -53,19 +51,7 @@ from case
 					<salesforce:parameters><![CDATA[#[output application/java
 ---
 {
-	contactEmail : vars.EmailContact
-}]]]></salesforce:parameters>
-				</salesforce:query>
-			</route>
-			<route >
-				<salesforce:query doc:name="Get Opportunities of Account" doc:id="d42db68e-af0b-4569-b073-cd5d47299e8f" config-ref="Salesforce_Config">
-					<salesforce:salesforce-query ><![CDATA[Select Id,name,Amount,Probability, StageName, CloseDate, AccountId, Account.Name 
-from Opportunity
- where AccountId = ':accountId']]></salesforce:salesforce-query>
-					<salesforce:parameters ><![CDATA[#[output application/java
----
-{
-	accountId : vars.AccountId
+	contactEmail : vars.contactEmail
 }]]]></salesforce:parameters>
 				</salesforce:query>
 			</route>
@@ -98,13 +84,6 @@ var contactInfo = vars.ContactInfo[0]
         	"phone":  value.payload[0].Phone,
         	"annualRevenue":  value.payload[0].AnnualRevenue
   	},
-  	"opportunities": opportunities map (item,index)->{
-  		"name":item.Name,
-  		"amount":item.Amount,
-  		"probability":item.Probability,
-  		"stageName":item.StageName,
-  		"closeDate":item.CloseDate
-  	},
   
   "cases": cases map (item, index) -> {
       "subject": item.Subject,
@@ -115,17 +94,12 @@ var contactInfo = vars.ContactInfo[0]
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<http:request method="POST" doc:name="Request" doc:id="7581bc9c-31e0-4edc-9194-fd2a884ca67d" config-ref="HTTP_Request_configuration" path="/api/pdf/{id}" responseTimeout="#[vars.timeout]">
+		<http:request method="POST" doc:name="Request" doc:id="7581bc9c-31e0-4edc-9194-fd2a884ca67d" config-ref="HTTP_Request_configuration" path="/api/pdf" responseTimeout="#[${http.timeout}]">
 			<http:headers ><![CDATA[#[output application/json
 ---
 {
 	
 }]]]></http:headers>
-			<http:uri-params ><![CDATA[#[output application/java
----
-{
-	id : vars.contactID
-}]]]></http:uri-params>
 		</http:request>
 		<logger level="INFO" doc:name="Logger" doc:id="e86a2eab-1afe-441c-8165-d79c230eed9a" message="#[payload]"/>
 	</flow>

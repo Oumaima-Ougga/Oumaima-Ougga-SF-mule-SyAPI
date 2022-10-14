@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="GetDataContact" doc:id="852e1e86-3a41-4729-813c-0d964aae0ef4" >
+		<set-variable value="#[attributes.uriParams.id]" doc:name="Set contact ID" doc:id="b9e2f286-a03d-4c41-be22-cf79d1f9007c" variableName="contactID"/>
+		<salesforce:query doc:name="Query" doc:id="abe9b443-65a2-4825-bd27-125b754410db" config-ref="Salesforce_Config">
+					<salesforce:salesforce-query><![CDATA[Select Id, FirstName, LastName, Phone, Email ,AccountId, Account.Name from Contact
+ where Id = ':contactId']]></salesforce:salesforce-query>
+					<salesforce:parameters><![CDATA[#[output application/java
+---
+{
+	contactId : vars.contactId
+}]]]></salesforce:parameters>
+				</salesforce:query>
+		<ee:transform doc:name="Transform Message" doc:id="82b8c2ac-e9fe-47fd-8b71-5bbb215f0025" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload]" doc:name="Set contact" doc:id="12c2c7c1-1b3e-4fd7-992a-7cc5c3c8848d" variableName="ContactInfo"/>
+		<set-variable value="#[payload.AccountId[0]]" doc:name="Set Account Id associated" doc:id="a20bbb4f-f884-4014-a645-e2060c3812f2" variableName="AccountId"/>
+		<set-variable value="#[payload[0].Email]" doc:name="Set Email Contact" doc:id="1414cec3-d249-427a-92bd-df374dd6b681" variableName="EmailContact"/>
+		<set-variable value="#[100000000]" doc:name="Set Timeout" doc:id="b29b5c4a-9a72-43c9-bd86-bd73d31dc65f" variableName="timeout"/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="49500ac2-05d8-4b90-8ede-a50741772223">
+			<route>
+				<salesforce:query doc:name="Get Account Data" doc:id="074602ab-e654-434a-846e-8c42d2bf06ed" config-ref="Salesforce_Config">
+					<salesforce:salesforce-query><![CDATA[Select Id,  Name, Type,  BillingStreet, BillingCity, BillingState, 
+BillingPostalCode, BillingCountry,  ShippingStreet, ShippingCity, ShippingState,
+ ShippingPostalCode, ShippingCountry,   Phone, Fax, AccountNumber, Website,  Industry, 
+ AnnualRevenue, NumberOfEmployees, Description, Rating
+  from Account 
+  where id = ':accountId']]></salesforce:salesforce-query>
+					<salesforce:parameters><![CDATA[#[output application/java
+---
+{
+	accountId : vars.AccountId
+}]]]></salesforce:parameters>
+				</salesforce:query>
+			</route>
+			<route>
+				<salesforce:query doc:name="Get Cases" doc:id="c9f93761-f6f8-4b7e-8ecc-5f27c4bf59ad" config-ref="Salesforce_Config">
+					<salesforce:salesforce-query><![CDATA[Select Id,CaseNumber, Subject, Priority, Status, AccountId, Account.Name, ContactEmail  
+from case
+ where ContactEmail = ':contactEmail']]></salesforce:salesforce-query>
+					<salesforce:parameters><![CDATA[#[output application/java
+---
+{
+	contactEmail : vars.EmailContact
+}]]]></salesforce:parameters>
+				</salesforce:query>
+			</route>
+			<route >
+				<salesforce:query doc:name="Get Opportunities of Account" doc:id="d42db68e-af0b-4569-b073-cd5d47299e8f" config-ref="Salesforce_Config">
+					<salesforce:salesforce-query ><![CDATA[Select Id,name,Amount,Probability, StageName, CloseDate, AccountId, Account.Name 
+from Opportunity
+ where AccountId = ':accountId']]></salesforce:salesforce-query>
+					<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	accountId : vars.AccountId
+}]]]></salesforce:parameters>
+				</salesforce:query>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Transform Message" doc:id="c56cdcd4-e614-465a-8e1d-cc70519ebe4f">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var value = payload."0"
+var cases = payload."1".payload
+var opportunities = payload."2".payload
+var contactInfo = vars.ContactInfo[0]
+---
+{
+	"num": contactInfo.Id,
+    "email": contactInfo.Email,
+    "firstName": contactInfo.FirstName,
+    "lastName": contactInfo.LastName,
+    "phone": contactInfo.Phone, 
+    "client":{
+    		"name": value.payload[0].Name,
+        	"description": value.payload[0].Description,
+        	"accountNumber": value.payload[0].AccountNumber,
+        	"billingCity":  value.payload[0].BillingCity,
+        	"billingStreet":  value.payload[0].BillingStreet,
+        	"billingState":  value.payload[0].BillingState,
+        	"numberOfEmployees":  value.payload[0].NumberOfEmployees,
+        	"industry":  value.payload[0].Industry,
+        	"type":  value.payload[0].Type,
+        	"phone":  value.payload[0].Phone,
+        	"annualRevenue":  value.payload[0].AnnualRevenue
+  	},
+  	"opportunities": opportunities map (item,index)->{
+  		"name":item.Name,
+  		"amount":item.Amount,
+  		"probability":item.Probability,
+  		"stageName":item.StageName,
+  		"closeDate":item.CloseDate
+  	},
+  
+  "cases": cases map (item, index) -> {
+      "subject": item.Subject,
+      "priority": item.Priority,
+      "contactEmail": item.ContactEmail,
+      "status": item.Status
+}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<http:request method="POST" doc:name="Request" doc:id="7581bc9c-31e0-4edc-9194-fd2a884ca67d" config-ref="HTTP_Request_configuration" path="/api/pdf/{id}" responseTimeout="#[vars.timeout]">
+			<http:headers ><![CDATA[#[output application/json
+---
+{
+	
+}]]]></http:headers>
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	id : vars.contactID
+}]]]></http:uri-params>
+		</http:request>
+		<logger level="INFO" doc:name="Logger" doc:id="e86a2eab-1afe-441c-8165-d79c230eed9a" message="#[payload]"/>
+	</flow>
+</mule>

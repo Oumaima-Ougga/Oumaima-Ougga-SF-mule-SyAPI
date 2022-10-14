@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="f3eaf6c0-7940-4936-a20b-725105c3a6b5" >
+		<salesforce:jwt-connection consumerKey="3MVG9DREgiBqN9Wk6NTTwuQ9pabNYV5zqntgOmbzxoE2hCmljK4q07644KQY1pFPg9HvH6is05VnwmVgsBBBc" storePassword="12345" principal="skassouni@deloitte.fr.mulesoft" keyStore="C:\Users\oougga\AnypointStudio\studio-workspace\sf-mule-syapi\src\main\resources\00D8d000006xkuT.jks"/>
+	</salesforce:sfdc-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="c4b57cd6-4dc4-4666-965f-37cb0c2c279c">
+		<http:request-connection host="localhost" port="8081" />
+	</http:request-config>
+	<error-handler name="globalError_Handler" doc:id="724c88a5-0c9c-4618-9ec2-e18591205fc6" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="8706bb44-3f3a-4e6c-9737-3e4847a92e34" type="ANY">
+			<set-payload value="Failed to get Data" doc:name="Set Payload" doc:id="c5937f13-fc0e-4f37-a3d3-8509c4c239ac" />
+			<logger level="INFO" doc:name="Logger" doc:id="fca1cf15-9649-4c5d-806a-37816b4481a4" message="Faild to get Data from salesforce"/>
+		</on-error-propagate>
+	</error-handler>
+</mule>

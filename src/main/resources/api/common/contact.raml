@@ -1,0 +1,23 @@
+#%RAML 1.0 NamedExample
+
+value:
+    userDetails:
+        Email: lboyle@uog.com
+        FirstName: Lauren
+        Phone: (212) 842-5500
+        LastName: Boyle
+        Account: !include account.raml
+        Cases: [
+	{
+                "Subject": "Performance inadequate for second consecutive week",
+                "Priority": "High",
+                "ContactEmail": "lboyle@uog.com",
+                "Status": "Closed"
+            },	{
+                "Subject": "Performance inadequate for second consecutive week",
+                "Priority": "High",
+                "ContactEmail": "lboyle@uog.com",
+                "Status": "Closed"
+            }
+  ]
+                

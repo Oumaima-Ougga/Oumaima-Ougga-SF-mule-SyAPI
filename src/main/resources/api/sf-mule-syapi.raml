@@ -1,0 +1,23 @@
+#%RAML 1.0
+title: SF-mule-SyAPI
+
+types: 
+    ContactObject: !include examples/ContactObject.json
+    
+  
+/contactDetails:
+  /{id}:
+    get:
+     responses:
+       200:
+          body:
+             application/json:
+                type: ContactObject
+                examples:
+                  output: !include common/contact.raml
+                
+                
+                 
+             
+    
+

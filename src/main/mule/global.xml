@@ -6,7 +6,7 @@
 http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
 	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="f3eaf6c0-7940-4936-a20b-725105c3a6b5" >
-		<salesforce:jwt-connection consumerKey="3MVG9DREgiBqN9Wk6NTTwuQ9pabNYV5zqntgOmbzxoE2hCmljK4q07644KQY1pFPg9HvH6is05VnwmVgsBBBc" storePassword="12345" principal="skassouni@deloitte.fr.mulesoft" keyStore="C:\Users\oougga\AnypointStudio\studio-workspace\sf-mule-syapi\src\main\resources\00D8d000006xkuT.jks"/>
+		<salesforce:jwt-connection consumerKey="3MVG9DREgiBqN9Wk6NTTwuQ9pabNYV5zqntgOmbzxoE2hCmljK4q07644KQY1pFPg9HvH6is05VnwmVgsBBBc" storePassword="12345" principal="skassouni@deloitte.fr.mulesoft" keyStore="/Users/chake/AnypointStudio/studio-workspace/salesf-mule-syapi/src/main/resources/00D8d000006xkuT.jks"/>
 	</salesforce:sfdc-config>
 	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="c4b57cd6-4dc4-4666-965f-37cb0c2c279c">
 		<http:request-connection host="localhost" port="8081" />
